@@ -11,12 +11,16 @@ Commands below are for **Windows (PowerShell)** using `winget`. Equivalents exis
 | Git | Version control | `git --version` | `winget install --id Git.Git -e` |
 | Node.js (LTS) | Frontend + Functions runtime, npm | `node --version` / `npm --version` | `winget install --id OpenJS.NodeJS.LTS -e` |
 | GitHub CLI | Repo/auth operations | `gh --version` | `winget install --id GitHub.cli -e` |
+| Azure CLI | Provision/manage Azure (Bicep) | `az version` | `winget install --id Microsoft.AzureCLI -e` |
+
+The Bicep tooling ships with the Azure CLI; `az bicep build` will fetch it automatically on first use (or run `az bicep install`).
 
 ### Known-good versions (last verified 2026-07-09)
 
 - Git 2.55.x
 - Node.js v24.18.0 (LTS), npm 11.16.0
 - GitHub CLI 2.96.0
+- Azure CLI 2.88.0
 
 > After installing via winget, open a **new** terminal so the tools are on your PATH.
 
@@ -26,7 +30,6 @@ These will be installed when the relevant workstream begins; entries will be fil
 
 - **Azure Functions Core Tools** — run the Functions API locally.
 - **Azure Static Web Apps CLI (`swa`)** — run the full app (frontend + API + emulated auth) locally.
-- **Azure CLI (`az`)** — provision/manage Azure resources (used with Bicep).
 
 ## Accounts & one-time configuration
 
