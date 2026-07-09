@@ -60,10 +60,17 @@ resource assetsContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   }
 }
 
-// Everything starts Hot. Auto-tier by asset type (still online/instant; never Archive):
-//  - Season (global) assets under assets/seasons/: Hot for 13 months, then straight to Cold.
-//  - Tournament assets under assets/users/: Hot 30d -> Cool (90d) -> Cold at day 120.
-// Prefix matches include the container name as the first segment.
+// Everything starts Hot. Auto-tier by asset type via leading-prefix rules
+// (all tiers stay online/instant; never Archive). Prefix matches include the
+// container name as the first segment.
+//  - Season (global) assets, assets/seasons/*: age-based BACKSTOP to Cold at ~13mo.
+//      The intended "Cold as of June 1 each season" is a calendar date, which
+//      lifecycle rules cannot express; that will be done by an admin "close out
+//      season" action (HTTP function). This rule is only a safety net.
+//  - Tournament uploads, assets/users/*: Hot 30d -> Cool (90d) -> Cold at day 120.
+//  - Generated decks (output), assets/outputs/*: Hot 7d -> Cold. Short Hot window
+//      covers the near-immediate (fee-free) download; skips Cool to avoid its
+//      30-day minimum-retention early-deletion fee.
 resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2023-05-01' = {
   parent: storage
   name: 'default'
@@ -71,7 +78,7 @@ resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2
     policy: {
       rules: [
         {
-          name: 'season-assets-hot-then-cold-13mo'
+          name: 'season-assets-cold-backstop-13mo'
           enabled: true
           type: 'Lifecycle'
           definition: {
@@ -85,7 +92,7 @@ resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2
             }
             actions: {
               baseBlob: {
-                // 13 months ~= 395 days.
+                // 13 months ~= 395 days. Backstop only; see note above.
                 tierToCold: {
                   daysAfterModificationGreaterThan: 395
                 }
@@ -94,7 +101,7 @@ resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2
           }
         }
         {
-          name: 'tournament-assets-hot-cool-cold'
+          name: 'tournament-uploads-hot-cool-cold'
           enabled: true
           type: 'Lifecycle'
           definition: {
@@ -113,6 +120,28 @@ resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2
                 }
                 tierToCold: {
                   daysAfterModificationGreaterThan: 120
+                }
+              }
+            }
+          }
+        }
+        {
+          name: 'generated-outputs-hot-then-cold'
+          enabled: true
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                '${assetsContainerName}/outputs/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                tierToCold: {
+                  daysAfterModificationGreaterThan: 7
                 }
               }
             }

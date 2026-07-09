@@ -7,11 +7,12 @@ Phase 1 infrastructure for CelebrationDeck. Cost-optimized: **Static Web Apps Fr
 - **Azure Static Web App** (`celebrationdeck-swa-cus-prod`, Free tier) — hosts the frontend and the managed Functions API. Not linked to a repo here; CI/CD is wired separately (GitHub Actions) using the deployment token.
 - **Storage account** (`celebrationdeckstcusprod`, StorageV2, **Standard ZRS**, default access tier **Hot**):
   - Zone-redundant (3 replicas across 3 availability zones) so data survives a single-AZ failure.
-  - Blob container `assets` (private) — season + per-tournament files (SAS-scoped by prefix at runtime).
+  - Blob container `assets` (private), with type-leading prefixes so lifecycle can target each (SAS-scoped by prefix at runtime).
   - Tables `users`, `seasons`, `tournaments`.
   - Lifecycle (never Archive; all tiers stay online/instant):
-    - `assets/seasons/*` (global): Hot for **13 months**, then straight to **Cold**.
-    - `assets/users/*` (tournament): Hot **30 days** → **Cool** (90 days) → **Cold** at day 120.
+    - `assets/seasons/*` (global): backstop to **Cold at ~13 months**. (The intended "Cold as of June 1 each season" is a calendar date lifecycle can't express; that's handled by a future admin "close out season" action. This rule is just a safety net.)
+    - `assets/users/*` (tournament uploads): Hot **30 days** → **Cool** (90 days) → **Cold** at day 120.
+    - `assets/outputs/*` (generated decks): Hot **7 days** → **Cold** (short Hot window covers the fee-free immediate download; skips Cool to avoid its 30-day minimum).
 - **SWA app settings** for the API: storage account name + connection string (key read at deploy time, never committed), container/table names, and `ADMIN_USER_IDS` (admin bootstrap).
 
 ## Files
