@@ -5,6 +5,11 @@
     "apiRuntime": "node:20"
   },
   "routes": [
+    { "route": "/api/roles", "allowedRoles": ["anonymous"] },
+    { "route": "/api/health", "allowedRoles": ["anonymous"] },
+    { "route": "/api/access-request", "allowedRoles": ["authenticated"] },
+    { "route": "/api/access-requests", "allowedRoles": ["admin"] },
+    { "route": "/api/access-decision", "allowedRoles": ["admin"] },
     { "route": "/.auth/login/github", "statusCode": 404 },
     { "route": "/.auth/login/twitter", "statusCode": 404 },
     { "route": "/admin", "allowedRoles": ["admin"] },
@@ -25,6 +30,24 @@
     "401": { "rewrite": "/index.html", "statusCode": 200 },
     "403": { "rewrite": "/index.html", "statusCode": 200 },
     "404": { "rewrite": "/index.html", "statusCode": 200 }
+  },
+  "auth": {
+    "rolesSource": "/api/roles",
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/common/v2.0",
+          "clientIdSettingName": "AAD_CLIENT_ID",
+          "clientSecretSettingName": "AAD_CLIENT_SECRET"
+        }
+      },
+      "google": {
+        "registration": {
+          "clientIdSettingName": "GOOGLE_CLIENT_ID",
+          "clientSecretSettingName": "GOOGLE_CLIENT_SECRET"
+        }
+      }
+    }
   },
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",

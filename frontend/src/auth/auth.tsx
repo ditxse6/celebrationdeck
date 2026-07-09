@@ -29,6 +29,9 @@ export type AccessStatus =
   | 'approved'
   | 'admin';
 
+/** SWA login provider route names configured in staticwebapp.config.json. */
+export type LoginProvider = 'aad' | 'google';
+
 const DEV_ROLE_KEY = 'celebrationdeck.devRole';
 
 interface AuthState {
@@ -36,7 +39,7 @@ interface AuthState {
   principal: ClientPrincipal | null;
   status: AccessStatus;
   roles: string[];
-  login: (redirectTo?: string) => void;
+  login: (provider?: LoginProvider, redirectTo?: string) => void;
   logout: () => void;
   /** Dev-only: simulate a role/status locally without a real SWA login. */
   devRole: string | null;
@@ -111,9 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [isDev],
   );
 
-  const login = useCallback((redirectTo = '/app') => {
+  const login = useCallback((provider: LoginProvider = 'aad', redirectTo = '/app') => {
     const target = encodeURIComponent(redirectTo);
-    window.location.href = `/.auth/login/aad?post_login_redirect_uri=${target}`;
+    window.location.href = `/.auth/login/${provider}?post_login_redirect_uri=${target}`;
   }, []);
 
   const logout = useCallback(() => {

@@ -29,9 +29,17 @@ export default function Login() {
         <div className="card stack">
           <h1 className="page-title">{t('auth.signInTitle')}</h1>
           <p className="lede">{t('auth.signInBody')}</p>
-          <button className="btn btn--primary" onClick={() => login()}>
-            {t('auth.signInButton')}
-          </button>
+          <div className="stack" style={{ gap: 12 }}>
+            <button className="btn btn--primary" onClick={() => login('google')}>
+              {t('auth.signInGoogle')}
+            </button>
+            <button className="btn btn--secondary" onClick={() => login('aad')}>
+              {t('auth.signInMicrosoft')}
+            </button>
+          </div>
+          <p className="muted" style={{ marginTop: 4, fontSize: '0.9rem' }}>
+            {t('auth.orgAccountNote')}
+          </p>
         </div>
       </div>
     </main>

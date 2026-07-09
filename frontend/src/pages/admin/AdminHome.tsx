@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface Season {
@@ -6,18 +6,41 @@ interface Season {
   endYear: number;
 }
 interface AccessRequest {
-  id: string;
+  identityProvider: string;
+  userId: string;
   name: string;
   org: string;
+  role: string;
+  notes: string;
+  userDetails: string;
 }
 
 export default function AdminHome() {
   const { t } = useTranslation();
   const [seasons, setSeasons] = useState<Season[]>([{ displayYear: '2026-27', endYear: 2027 }]);
-  const [requests, setRequests] = useState<AccessRequest[]>([
-    { id: 'r1', name: 'Jane Organizer', org: 'Region 12' },
-    { id: 'r2', name: 'Sam Coordinator', org: 'State Affiliate' },
-  ]);
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadRequests = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/access-requests');
+      if (!res.ok) throw new Error(`load failed (${res.status})`);
+      const data = (await res.json()) as { requests: AccessRequest[] };
+      setRequests(data.requests ?? []);
+    } catch {
+      setError(t('admin.approvals.loadError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    void loadRequests();
+  }, [loadRequests]);
 
   const addSeason = () => {
     const nextEnd = Math.max(...seasons.map((s) => s.endYear)) + 1;
@@ -25,7 +48,23 @@ export default function AdminHome() {
     setSeasons((prev) => [{ displayYear: display, endYear: nextEnd }, ...prev]);
   };
 
-  const resolve = (id: string) => setRequests((prev) => prev.filter((r) => r.id !== id));
+  const decide = async (r: AccessRequest, decision: 'approve' | 'deny') => {
+    setBusy(r.userId);
+    setError(null);
+    try {
+      const res = await fetch('/api/access-decision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identityProvider: r.identityProvider, userId: r.userId, decision }),
+      });
+      if (!res.ok) throw new Error(`decision failed (${res.status})`);
+      setRequests((prev) => prev.filter((x) => x.userId !== r.userId));
+    } catch {
+      setError(t('admin.approvals.decisionError'));
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <main>
@@ -34,7 +73,6 @@ export default function AdminHome() {
           <h1 className="page-title">{t('admin.title')}</h1>
           <p className="lede">{t('admin.subtitle')}</p>
         </div>
-        <span className="mock-note">{t('common.mockup')}</span>
 
         <div className="card stack">
           <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -43,6 +81,7 @@ export default function AdminHome() {
               + {t('admin.seasons.new')}
             </button>
           </div>
+          <span className="mock-note">{t('common.mockup')}</span>
           <p className="muted">{t('admin.seasons.note')}</p>
           <div className="card-grid">
             {seasons.map((s) => (
@@ -57,19 +96,34 @@ export default function AdminHome() {
         </div>
 
         <div className="card stack">
-          <h2 style={{ margin: 0 }}>{t('admin.approvals.title')}</h2>
-          {requests.length === 0 && <p className="muted">{t('admin.approvals.empty')}</p>}
+          <div className="row" style={{ justifyContent: 'space-between' }}>
+            <h2 style={{ margin: 0 }}>{t('admin.approvals.title')}</h2>
+            <button className="btn btn--ghost" onClick={() => void loadRequests()} disabled={loading}>
+              {t('admin.approvals.refresh')}
+            </button>
+          </div>
+          <p className="muted">{t('admin.approvals.effectNote')}</p>
+          {error && <p style={{ color: 'var(--orange-600)' }}>{error}</p>}
+          {loading && <p className="muted">{t('common.loading')}</p>}
+          {!loading && requests.length === 0 && <p className="muted">{t('admin.approvals.empty')}</p>}
           {requests.map((r) => (
-            <div className="row" key={r.id} style={{ justifyContent: 'space-between' }}>
+            <div className="row" key={`${r.identityProvider}:${r.userId}`} style={{ justifyContent: 'space-between' }}>
               <div>
-                <strong>{r.name}</strong>
-                <span className="muted"> — {r.org}</span>
+                <strong>{r.name || r.userDetails || t('admin.approvals.unnamed')}</strong>
+                {r.org && <span className="muted"> — {r.org}</span>}
+                {r.role && <div className="muted" style={{ fontSize: '0.9rem' }}>{r.role}</div>}
+                {r.notes && <div className="muted" style={{ fontSize: '0.9rem' }}>{r.notes}</div>}
               </div>
               <div className="row">
-                <button className="btn btn--primary" onClick={() => resolve(r.id)}>
+                <button className="btn btn--primary" disabled={busy === r.userId} onClick={() => void decide(r, 'approve')}>
                   {t('admin.approvals.approve')}
                 </button>
-                <button className="btn btn--ghost" style={{ color: 'var(--purple-700)', borderColor: 'var(--line)' }} onClick={() => resolve(r.id)}>
+                <button
+                  className="btn btn--ghost"
+                  style={{ color: 'var(--purple-700)', borderColor: 'var(--line)' }}
+                  disabled={busy === r.userId}
+                  onClick={() => void decide(r, 'deny')}
+                >
                   {t('admin.approvals.deny')}
                 </button>
               </div>

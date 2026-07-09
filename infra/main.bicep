@@ -6,8 +6,9 @@
 //     --template-file infra/main.bicep \
 //     --parameters infra/main.parameters.json
 //
-// Cost posture: Static Web Apps Free tier + Storage (Standard LRS, Cool) only.
-// No always-on / hourly-billed resources. ~$0 at idle.
+// Cost posture: Static Web Apps STANDARD (~$9/mo, only fixed cost) + Storage
+// (Standard ZRS, Hot) consumption-billed. No other always-on / hourly resources.
+// Standard is required for custom auth (Google + Microsoft), rolesSource, and BYOF.
 
 targetScope = 'subscription'
 
@@ -26,9 +27,22 @@ param regionAbbr string = 'cus'
 @description('Short environment suffix used in resource names (e.g. prod).')
 param environmentName string = 'prod'
 
-@description('Comma-separated Entra (AAD) object IDs granted admin at login (bootstrap). Keep in the gitignored real params file, not in source control.')
+@description('Comma-separated Entra (AAD) object IDs (oid claim) granted admin at login (bootstrap). Keep in the gitignored real params file.')
+param adminEntraOid string = ''
+
+@description('Application (client) ID of the Entra app registration for Microsoft sign-in.')
+param aadClientId string = ''
+
+@description('Client secret for the Entra app registration. Keep only in the gitignored real params file.')
 @secure()
-param adminUserIds string = ''
+param aadClientSecret string = ''
+
+@description('Google OAuth client ID. Empty until configured in Google Cloud Console.')
+param googleClientId string = ''
+
+@description('Google OAuth client secret. Keep only in the gitignored real params file.')
+@secure()
+param googleClientSecret string = ''
 
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
@@ -43,7 +57,11 @@ module resources 'resources.bicep' = {
     baseName: baseName
     regionAbbr: regionAbbr
     environmentName: environmentName
-    adminUserIds: adminUserIds
+    adminEntraOid: adminEntraOid
+    aadClientId: aadClientId
+    aadClientSecret: aadClientSecret
+    googleClientId: googleClientId
+    googleClientSecret: googleClientSecret
   }
 }
 

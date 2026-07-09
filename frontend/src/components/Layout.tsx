@@ -7,7 +7,7 @@ import DevRoleSwitcher from './DevRoleSwitcher';
 
 export default function Layout() {
   const { t } = useTranslation();
-  const { status, login, logout } = useAuth();
+  const { status, logout } = useAuth();
 
   const isApproved = status === 'approved' || status === 'admin';
   const isAdmin = status === 'admin';
@@ -34,9 +34,9 @@ export default function Layout() {
                 {t('nav.signOut')}
               </button>
             ) : (
-              <button className="btn btn--primary" onClick={() => login()}>
+              <Link className="btn btn--primary" to="/login">
                 {t('nav.signIn')}
-              </button>
+              </Link>
             )}
           </nav>
         </div>

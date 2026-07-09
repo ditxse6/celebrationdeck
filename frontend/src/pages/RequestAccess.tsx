@@ -6,18 +6,36 @@ export default function RequestAccess() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
-    // Mockup: no request is actually written yet (see Workstream 4).
-    setTimeout(() => navigate('/pending'), 400);
+    setError(null);
+    const form = new FormData(e.currentTarget);
+    try {
+      const res = await fetch('/api/access-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.get('name'),
+          org: form.get('org'),
+          role: form.get('role'),
+          notes: form.get('notes'),
+        }),
+      });
+      if (!res.ok) throw new Error(`request failed (${res.status})`);
+      const data = (await res.json()) as { status?: string };
+      navigate(data.status === 'approved' ? '/app' : '/pending');
+    } catch {
+      setError(t('requestAccess.error'));
+      setSubmitting(false);
+    }
   };
 
   return (
     <main>
       <div className="container" style={{ maxWidth: 620 }}>
-        <span className="mock-note">{t('common.mockup')}</span>
         <h1 className="page-title" style={{ marginTop: 16 }}>
           {t('requestAccess.title')}
         </h1>
@@ -39,6 +57,11 @@ export default function RequestAccess() {
             <label htmlFor="notes">{t('requestAccess.notesLabel')}</label>
             <textarea id="notes" name="notes" rows={3} />
           </div>
+          {error && (
+            <p className="muted" style={{ color: 'var(--orange-600)' }}>
+              {error}
+            </p>
+          )}
           <button className="btn btn--primary" type="submit" disabled={submitting}>
             {t('requestAccess.submit')}
           </button>

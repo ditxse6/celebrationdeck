@@ -1,6 +1,12 @@
 // CelebrationDeck — Phase 1 resources (resource-group scoped).
-// Static Web App (Free) + Storage account (Blob + Table, Standard LRS, Cool),
-// with a lifecycle rule to tier blobs to Cold after 90 days, and API app settings.
+// Static Web App (Standard) + Storage account (Blob + Table, Standard ZRS, Hot),
+// per-prefix blob lifecycle rules, custom-auth provider app settings, and API
+// app settings.
+//
+// SWA is on the STANDARD tier (~$9/mo, the only fixed cost): required for custom
+// auth providers (Google + Microsoft), the rolesSource function, and linking a
+// standalone Function App (BYOF) for heavy generation later. Everything else is
+// consumption-billed and ~$0 at idle.
 
 @description('Azure region for all resources.')
 param location string
@@ -14,9 +20,22 @@ param regionAbbr string = 'cus'
 @description('Short environment suffix (e.g. prod).')
 param environmentName string = 'prod'
 
-@description('Comma-separated Entra object IDs granted admin at login (bootstrap).')
+@description('Comma-separated Entra object IDs (oid claim) granted admin at login (bootstrap). Matched by the rolesSource function against the token objectidentifier claim.')
+param adminEntraOid string = ''
+
+@description('Application (client) ID of the Entra app registration used for Microsoft sign-in.')
+param aadClientId string = ''
+
+@description('Client secret for the Entra app registration. Keep only in the gitignored real params file.')
 @secure()
-param adminUserIds string = ''
+param aadClientSecret string = ''
+
+@description('Google OAuth client ID (from Google Cloud Console). Empty until configured.')
+param googleClientId string = ''
+
+@description('Google OAuth client secret. Keep only in the gitignored real params file. Empty until configured.')
+@secure()
+param googleClientSecret string = ''
 
 // Table + container names (kept as vars so the API and infra agree).
 var usersTableName = 'users'
@@ -173,8 +192,9 @@ resource swa 'Microsoft.Web/staticSites@2023-12-01' = {
   name: swaName
   location: location
   sku: {
-    name: 'Free'
-    tier: 'Free'
+    // Standard: needed for custom auth providers, rolesSource, and BYOF.
+    name: 'Standard'
+    tier: 'Standard'
   }
   properties: {
     allowConfigFileUpdates: true
@@ -182,8 +202,12 @@ resource swa 'Microsoft.Web/staticSites@2023-12-01' = {
   }
 }
 
-// Application settings exposed to the SWA-managed Functions API.
-// The storage key is read at deploy time (listKeys) and never stored in source.
+// Application settings exposed to the SWA-managed Functions API and referenced
+// by staticwebapp.config.json for custom auth (clientIdSettingName / secret).
+// The storage key is read at deploy time (listKeys) and never stored in source;
+// provider client ids/secrets come from params (real values in the gitignored
+// params file). NOTE: this resource is a full replace of app settings, so all
+// values must be supplied here (don't set them out-of-band or a redeploy wipes them).
 resource swaAppSettings 'Microsoft.Web/staticSites/config@2023-12-01' = {
   parent: swa
   name: 'appsettings'
@@ -194,7 +218,11 @@ resource swaAppSettings 'Microsoft.Web/staticSites/config@2023-12-01' = {
     TABLE_USERS: usersTableName
     TABLE_SEASONS: seasonsTableName
     TABLE_TOURNAMENTS: tournamentsTableName
-    ADMIN_USER_IDS: adminUserIds
+    ADMIN_ENTRA_OID: adminEntraOid
+    AAD_CLIENT_ID: aadClientId
+    AAD_CLIENT_SECRET: aadClientSecret
+    GOOGLE_CLIENT_ID: googleClientId
+    GOOGLE_CLIENT_SECRET: googleClientSecret
   }
 }
 

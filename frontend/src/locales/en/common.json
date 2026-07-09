@@ -35,8 +35,10 @@
   },
   "auth": {
     "signInTitle": "Sign in",
-    "signInBody": "Sign in with your Microsoft account to continue.",
-    "signInButton": "Sign in with Microsoft"
+    "signInBody": "Choose how you'd like to sign in.",
+    "signInGoogle": "Continue with Google",
+    "signInMicrosoft": "Continue with Microsoft",
+    "orgAccountNote": "You can use a work or school account, but some organizations block sign-in to outside apps. If yours asks for administrator approval and you can't get it, sign in with a personal Google or Microsoft account instead."
   },
   "requestAccess": {
     "title": "Request access",
@@ -45,7 +47,8 @@
     "orgLabel": "Region / affiliate / group",
     "roleLabel": "Your role",
     "notesLabel": "Anything else we should know?",
-    "submit": "Submit request"
+    "submit": "Submit request",
+    "error": "Something went wrong submitting your request. Please try again."
   },
   "pending": {
     "title": "Request received",
@@ -84,7 +87,17 @@
     "title": "Administration",
     "subtitle": "Manage seasons and review access requests.",
     "seasons": { "title": "Seasons", "new": "New season", "note": "A season is annual (displayed as 2026-27) and holds default settings and shared assets." },
-    "approvals": { "title": "Access requests", "approve": "Approve", "deny": "Deny", "empty": "No pending requests." }
+    "approvals": {
+      "title": "Access requests",
+      "approve": "Approve",
+      "deny": "Deny",
+      "empty": "No pending requests.",
+      "refresh": "Refresh",
+      "unnamed": "(no name provided)",
+      "effectNote": "Approvals and denials take effect the next time that person signs in.",
+      "loadError": "Couldn't load access requests.",
+      "decisionError": "Couldn't save that decision. Please try again."
+    }
   },
   "common": {
     "mockup": "Mockup — not functional yet",

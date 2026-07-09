@@ -1,46 +1,52 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
+import { getUser, isAdmin, usersTableClient, type ClientPrincipal } from '../shared/users';
 
 /**
- * Body Azure Static Web Apps POSTs to the `auth.rolesSource` endpoint after a
- * successful login. We return the custom roles to assign to the user.
- * See: https://learn.microsoft.com/azure/static-web-apps/assign-roles-microsoft-graph
+ * Azure Static Web Apps POSTs the signed-in user to this endpoint (configured as
+ * `auth.rolesSource`) after each successful login, and assigns whatever custom
+ * roles we return. The payload has identityProvider/userId/userDetails/claims at
+ * the body root (no wrapper). Built-in roles (anonymous/authenticated) are added
+ * by the platform — we only return custom roles.
+ *
+ * Role model:
+ *   - admin: bootstrapped by Entra object id (oid claim) via ADMIN_ENTRA_OID.
+ *   - approved / pending / denied: looked up in the `users` table by
+ *     (identityProvider, userId). No record => no custom role (unregistered).
  */
-interface RolesRequest {
-  identityProvider?: string;
-  userId?: string;
-  userDetails?: string;
-  claims?: unknown[];
-  accessToken?: string;
-}
-
 export async function rolesSource(
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
-  let body: RolesRequest = {};
+  let body: ClientPrincipal;
   try {
-    body = (await request.json()) as RolesRequest;
+    body = (await request.json()) as ClientPrincipal;
   } catch {
     context.warn('rolesSource: request body was not valid JSON');
+    return { jsonBody: { roles: [] } };
   }
 
-  const adminIds = (process.env.ADMIN_USER_IDS ?? '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const roles: string[] = [];
-
-  // Admin bootstrap: admin user ids come from an app setting (never committed).
-  if (body.userId && adminIds.includes(body.userId)) {
-    roles.push('admin', 'approved');
+  // Admin bootstrap first — never touches storage, so admins get in even if
+  // Table Storage is unavailable.
+  if (isAdmin(body)) {
+    return { jsonBody: { roles: ['admin', 'approved'] } };
   }
 
-  // TODO (Workstream 4): look the user up in Table Storage and assign
-  // 'approved' | 'pending' | 'denied' based on their access-request status.
-  // For now, non-admins receive no custom roles (treated as "unregistered").
+  if (!body.identityProvider || !body.userId) {
+    return { jsonBody: { roles: [] } };
+  }
 
-  return { jsonBody: { roles } };
+  try {
+    const record = await getUser(usersTableClient(), body.identityProvider, body.userId);
+    if (record?.status === 'approved') return { jsonBody: { roles: ['approved'] } };
+    if (record?.status === 'pending') return { jsonBody: { roles: ['pending'] } };
+    if (record?.status === 'denied') return { jsonBody: { roles: ['denied'] } };
+  } catch (err) {
+    // Fail closed: on storage error, grant no elevated roles (user simply can't
+    // access gated areas), rather than blocking login entirely.
+    context.error('rolesSource: user lookup failed', err);
+  }
+
+  return { jsonBody: { roles: [] } };
 }
 
 app.http('rolesSource', {

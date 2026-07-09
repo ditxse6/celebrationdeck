@@ -1,9 +1,10 @@
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/auth';
 
 export default function Landing() {
   const { t } = useTranslation();
-  const { status, login } = useAuth();
+  const { status } = useAuth();
   const isSignedIn = status !== 'anonymous';
 
   return (
@@ -20,9 +21,9 @@ export default function Landing() {
                 {t('nav.app')}
               </a>
             ) : (
-              <button className="btn btn--primary" onClick={() => login()}>
+              <Link className="btn btn--primary" to="/login">
                 {t('landing.getStarted')}
-              </button>
+              </Link>
             )}
             <a className="btn btn--ghost" href="#how">
               {t('landing.learnMore')}

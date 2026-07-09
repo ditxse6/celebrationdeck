@@ -7,6 +7,10 @@
     "baseName": { "value": "celebrationdeck" },
     "regionAbbr": { "value": "cus" },
     "environmentName": { "value": "prod" },
-    "adminUserIds": { "value": "" }
+    "adminEntraOid": { "value": "<your-entra-object-id>" },
+    "aadClientId": { "value": "<entra-app-registration-client-id>" },
+    "aadClientSecret": { "value": "<entra-app-registration-client-secret>" },
+    "googleClientId": { "value": "" },
+    "googleClientSecret": { "value": "" }
   }
 }
