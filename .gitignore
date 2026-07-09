@@ -49,3 +49,6 @@ desktop.ini
 
 # Local sample data (not committed by default; add fixtures explicitly)
 /sample-data/
+
+# Private planning docs (synced via OneDrive, not published to the public repo)
+/planning/
