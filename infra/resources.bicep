@@ -32,11 +32,14 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName
   location: location
   sku: {
-    name: 'Standard_LRS'
+    // Zone-redundant: 3 replicas across 3 availability zones in the region,
+    // so data survives a single-AZ/datacenter failure. (SWA/Functions redundancy
+    // is platform-managed and not configurable; Free tier carries no SLA.)
+    name: 'Standard_ZRS'
   }
   kind: 'StorageV2'
   properties: {
-    accessTier: 'Cool'
+    accessTier: 'Hot'
     minimumTlsVersion: 'TLS1_2'
     supportsHttpsTrafficOnly: true
     allowBlobPublicAccess: false
@@ -57,7 +60,10 @@ resource assetsContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   }
 }
 
-// Tier blobs to Cold after ~90 days (still online/instant; avoids Archive rehydration).
+// Everything starts Hot. Auto-tier by asset type (still online/instant; never Archive):
+//  - Season (global) assets under assets/seasons/: Hot for 13 months, then straight to Cold.
+//  - Tournament assets under assets/users/: Hot 30d -> Cool (90d) -> Cold at day 120.
+// Prefix matches include the container name as the first segment.
 resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2023-05-01' = {
   parent: storage
   name: 'default'
@@ -65,7 +71,7 @@ resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2
     policy: {
       rules: [
         {
-          name: 'tier-to-cold-after-90d'
+          name: 'season-assets-hot-then-cold-13mo'
           enabled: true
           type: 'Lifecycle'
           definition: {
@@ -73,11 +79,40 @@ resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2
               blobTypes: [
                 'blockBlob'
               ]
+              prefixMatch: [
+                '${assetsContainerName}/seasons/'
+              ]
             }
             actions: {
               baseBlob: {
+                // 13 months ~= 395 days.
                 tierToCold: {
-                  daysAfterModificationGreaterThan: 90
+                  daysAfterModificationGreaterThan: 395
+                }
+              }
+            }
+          }
+        }
+        {
+          name: 'tournament-assets-hot-cool-cold'
+          enabled: true
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                '${assetsContainerName}/users/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                tierToCool: {
+                  daysAfterModificationGreaterThan: 30
+                }
+                tierToCold: {
+                  daysAfterModificationGreaterThan: 120
                 }
               }
             }
