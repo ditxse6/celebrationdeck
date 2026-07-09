@@ -49,4 +49,38 @@ docs/        This document and other project docs
 
 ## Common commands
 
-_To be added as the frontend/api scaffolding lands (install, dev server, build, local SWA, deploy)._
+Install dependencies (run once per folder, or after pulling dependency changes):
+
+```powershell
+cd frontend; npm install
+cd ..\api; npm install
+```
+
+Frontend (React + Vite + TS):
+
+```powershell
+cd frontend
+npm run dev      # local dev server (Vite) — auth is simulated; use the "dev role" selector in the header
+npm run build    # type-check (tsc -b) + production build to frontend/dist
+npm run preview  # preview the production build
+npm run lint     # oxlint
+```
+
+> Running `npm run dev` alone does not provide real Static Web Apps auth. The header shows a **"dev role"** selector (dev builds only) so you can click through anonymous / unregistered / pending / denied / approved / admin states without signing in. For real emulated auth, use the SWA CLI (below) once installed.
+
+API (Azure Functions, TypeScript):
+
+```powershell
+cd api
+npm run build    # compile TypeScript to api/dist
+npm start        # requires Azure Functions Core Tools (see below)
+```
+
+### Known-good versions (frontend, last verified 2026-07-09)
+
+- Vite 8, React 19, TypeScript ~6.0 (frontend); `@azure/functions` v4, TypeScript 5.9 (api)
+- Key libraries: react-router-dom 7, i18next 26 / react-i18next 17
+
+## Notes for this environment
+
+- **Windows sandbox:** on this machine the Cursor agent's shell sandbox (`workspace_readwrite`) is not supported, so shell commands must run with the sandbox disabled. This is an agent/runtime detail, not a project requirement.

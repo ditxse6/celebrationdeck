@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "home": "Home",
+    "app": "My Tournaments",
+    "admin": "Admin",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
+  },
+  "language": {
+    "label": "Language",
+    "other": "Other languages…"
+  },
+  "landing": {
+    "eyebrow": "For Destination Imagination tournament organizers",
+    "title": "Build your Closing Celebration slideshow",
+    "subtitle": "Upload the results export from the DI Scoring Program, add your assets, choose a few options, and CelebrationDeck assembles the slideshow that reveals your results.",
+    "getStarted": "Sign in to get started",
+    "learnMore": "How it works",
+    "who": {
+      "title": "Who can use this",
+      "body": "CelebrationDeck is offered to Destination Imagination regions and affiliates. Access is by approval: sign in, request access, and an administrator will approve your account."
+    },
+    "steps": {
+      "title": "How it works",
+      "one": { "title": "Upload results", "body": "Provide the results export (CSV) from the DI Scoring Program, and optionally a special-awards export." },
+      "two": { "title": "Add assets & options", "body": "Add your tournament's images and pick your options. Defaults come from the season set by an administrator." },
+      "three": { "title": "Generate the deck", "body": "CelebrationDeck builds a slideshow that reveals placements and advancing teams, ready to present." }
+    }
+  },
+  "footer": {
+    "createdBy": "CelebrationDeck — created by <0>Dustin Loftis</0>",
+    "region": "<0>TXCPSO, Southeast 6 Region</0>",
+    "source": "Source code",
+    "disclaimer": "CelebrationDeck is an independent tool and is not affiliated with, endorsed by, or sponsored by Destination Imagination, Inc. No DI logos or trademarks are used; \"Destination Imagination\" is referenced only to describe the tool's purpose."
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInBody": "Sign in with your Microsoft account to continue.",
+    "signInButton": "Sign in with Microsoft"
+  },
+  "requestAccess": {
+    "title": "Request access",
+    "body": "Your account isn't approved yet. Tell us a little about you and an administrator will review your request.",
+    "nameLabel": "Your name",
+    "orgLabel": "Region / affiliate / group",
+    "roleLabel": "Your role",
+    "notesLabel": "Anything else we should know?",
+    "submit": "Submit request"
+  },
+  "pending": {
+    "title": "Request received",
+    "body": "Thanks! Your access request is pending review. Approval takes effect the next time you sign in. You can close this page."
+  },
+  "denied": {
+    "title": "Access not granted",
+    "body": "Your access request was not approved. If you think this is a mistake, please contact the administrator."
+  },
+  "otherLanguages": {
+    "title": "Help translate CelebrationDeck",
+    "intro": "CelebrationDeck is built to support many languages. Only the interface text needs translating — the data you enter stays in whatever language you type.",
+    "howTitle": "How to contribute a translation",
+    "how": "Translations live as simple text files in the open-source repository. To add or improve a language, open the repository and submit your translation as a pull request, or contact the maintainer.",
+    "placeholderNote": "This is a placeholder page. Detailed contributor instructions will be added here.",
+    "openRepo": "Open the repository"
+  },
+  "app": {
+    "title": "My Tournaments",
+    "subtitle": "Create a tournament for your event, then upload results and assets and build your Closing Celebration deck.",
+    "newTournament": "New tournament",
+    "empty": "You don't have any tournaments yet.",
+    "openTournament": "Open",
+    "upload": {
+      "title": "Uploads",
+      "results": "Results export (CSV)",
+      "special": "Special awards export (optional)",
+      "assets": "Asset files (images)",
+      "choose": "Choose file",
+      "uploaded": "Uploaded files"
+    },
+    "settings": { "title": "Options", "note": "Options are placeholders for now — the real settings are designed once the results format is finalized." },
+    "generate": { "title": "Generate slideshow", "button": "Generate", "note": "This is a simulation. No file is produced yet." }
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Manage seasons and review access requests.",
+    "seasons": { "title": "Seasons", "new": "New season", "note": "A season is annual (displayed as 2026-27) and holds default settings and shared assets." },
+    "approvals": { "title": "Access requests", "approve": "Approve", "deny": "Deny", "empty": "No pending requests." }
+  },
+  "common": {
+    "mockup": "Mockup — not functional yet",
+    "back": "Back",
+    "loading": "Loading…"
+  }
+}

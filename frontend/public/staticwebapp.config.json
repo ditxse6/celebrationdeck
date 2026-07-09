@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/staticwebapp.config.json",
+  "trailingSlash": "auto",
+  "platform": {
+    "apiRuntime": "node:20"
+  },
+  "routes": [
+    { "route": "/.auth/login/github", "statusCode": 404 },
+    { "route": "/.auth/login/twitter", "statusCode": 404 },
+    { "route": "/admin", "allowedRoles": ["admin"] },
+    { "route": "/admin/*", "allowedRoles": ["admin"] },
+    { "route": "/app", "allowedRoles": ["approved", "admin"] },
+    { "route": "/app/*", "allowedRoles": ["approved", "admin"] }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/assets/*",
+      "/.auth/*",
+      "/api/*",
+      "/*.{css,js,json,svg,png,jpg,jpeg,gif,ico,webp,woff,woff2}"
+    ]
+  },
+  "responseOverrides": {
+    "401": { "rewrite": "/index.html", "statusCode": 200 },
+    "403": { "rewrite": "/index.html", "statusCode": 200 },
+    "404": { "rewrite": "/index.html", "statusCode": 200 }
+  },
+  "auth": {
+    "rolesSource": "/api/roles"
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  }
+}

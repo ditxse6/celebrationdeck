@@ -1,0 +1,5 @@
+*.ts
+tsconfig.json
+.vscode/
+local.settings.json
+node_modules/@types/
