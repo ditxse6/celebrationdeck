@@ -20,9 +20,10 @@ If you *do* want to run your own instance:
 
 - Frontend: React + Vite + TypeScript (internationalized; English first)
 - API: Azure Functions (TypeScript)
-- Hosting: Azure Static Web Apps (Free tier)
-- Storage: Azure Blob + Table Storage
-- Auth: Microsoft Entra ID via Static Web Apps built-in authentication
+- Hosting: Azure Static Web Apps (Standard tier)
+- Storage: Azure Blob + Table Storage (zone-redundant, with tiered lifecycle rules)
+- Auth: Static Web Apps authentication with custom identity providers (Microsoft and Google), plus role-based access control (self-service request → admin approval)
+- Infrastructure: Bicep (infrastructure-as-code); CI/CD via GitHub Actions
 
 ## Repository layout
 

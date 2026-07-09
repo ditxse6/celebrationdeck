@@ -39,7 +39,35 @@ These will be installed when the relevant workstream begins; entries will be fil
   git config user.name "Your Name"
   git config user.email "you@example.com"
   ```
-- **Azure**: (later) an Azure subscription is required to provision the Static Web App + Storage. Environment-specific values (subscription ID, resource names, connection strings, admin identity) are kept out of this repo.
+- **Azure**: an Azure subscription is required to provision the Static Web App + Storage. Environment-specific values (subscription ID, resource names, connection strings, admin identity, OAuth client secrets) are kept out of this repo — real deployment parameters live in a gitignored `infra/main.parameters.json` (copy from `infra/main.parameters.example.json`).
+
+## Cloud configuration & deployment
+
+Environment-specific values below are intentionally **not** in this repo. If you are standing up your own instance, you supply your own.
+
+### Infrastructure (Bicep)
+
+`infra/` deploys everything with Bicep. Copy the example params, fill in your values, and deploy at subscription scope:
+
+```powershell
+az deployment sub create --location <region> --template-file infra/main.bicep --parameters infra/main.parameters.json
+```
+
+This provisions an **Azure Static Web App (Standard tier)** and a **Storage account** (StorageV2, zone-redundant, with Hot→Cool→Cold lifecycle rules), and wires the API app settings.
+
+### Authentication providers
+
+Auth uses SWA custom identity providers. You need two app registrations and their client IDs/secrets stored as SWA app settings (via Bicep params): `AAD_CLIENT_ID`, `AAD_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Admin bootstrap is by Entra object ID via `ADMIN_ENTRA_OID`.
+
+- **Microsoft (Entra ID)** — register a multi-tenant + personal-accounts app.
+  - Redirect URI (Web): `https://<your-host>/.auth/login/aad/callback` (add one per host, including any custom domain).
+  - **Enable ID token issuance** on the app registration (Authentication → "ID tokens"). Without this, login completes at Microsoft but the SWA callback fails and the user lands back signed out.
+- **Google** — create an OAuth client (Web application) with the **External** consent screen so non-org accounts can sign in.
+  - Authorized redirect URI: `https://<your-host>/.auth/login/google/callback` (add one per host).
+
+### Custom domain
+
+Point a **CNAME (DNS-only, not proxied)** at the SWA default hostname, then register the hostname on the SWA (`az staticwebapp hostname set`). SWA issues free managed TLS once the CNAME validates. Add the domain's `/.auth/login/<provider>/callback` URIs to each provider above.
 
 ## Project structure
 
