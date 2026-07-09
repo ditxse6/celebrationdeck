@@ -30,7 +30,7 @@ These will be installed when the relevant workstream begins; entries will be fil
 
 ## Accounts & one-time configuration
 
-- **GitHub**: authenticate the CLI with `gh auth login` (GitHub.com, HTTPS, browser login). Repo: `ditxse6/awardsgen`.
+- **GitHub**: authenticate the CLI with `gh auth login` (GitHub.com, HTTPS, browser login). Repo: `ditxse6/celebrationdeck`.
 - **Git identity**: this repo sets a local `user.name` / `user.email`; set your own with:
   ```powershell
   git config user.name "Your Name"

@@ -1,0 +1,44 @@
+CelebrationDeck
+Copyright (C) 2026 Dustin Loftis (TXCPSO, Southeast 6 Region)
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, version 3. See the LICENSE file for the full text.
+
+--------------------------------------------------------------------------------
+ADDITIONAL TERMS under Section 7 of the GNU Affero General Public License v3.0
+--------------------------------------------------------------------------------
+
+In accordance with Section 7 of the GNU AGPL v3.0, the following additional
+terms apply to this work. These are limited to the categories permitted by
+Section 7 and impose no restrictions beyond it.
+
+1. (Section 7(b) - Attribution preservation)
+   If you convey the Program (or any work based on it), or make its
+   functionality available to users interacting with it remotely through a
+   computer network, you must preserve the following author attribution as an
+   Appropriate Legal Notice, displayed prominently and visibly in the running
+   application's user interface:
+
+       "CelebrationDeck - created by Dustin Loftis - source: <project repository URL>"
+
+   You may update the source URL to point to the corresponding source of your
+   modified version, but you may not remove the attribution to the original
+   author.
+
+2. (Section 7(c) - Misrepresentation of origin / marking of modified versions)
+   You may not misrepresent the origin of this material. If you modify the
+   Program and convey it or make it available over a network, you must mark
+   your modified versions as changed and clearly distinguish them from the
+   original "CelebrationDeck" so that they are not attributed to the original
+   author.
+
+These additional terms do not grant you rights to use the name "CelebrationDeck"
+or the author's name for endorsement or promotional purposes.
+
+--------------------------------------------------------------------------------
+
+CelebrationDeck is an independent tool and is not affiliated with, endorsed by,
+or sponsored by Destination Imagination, Inc. No Destination Imagination logos
+or trademarks are used. "Destination Imagination" and "DI" are referenced only
+descriptively to indicate the tool's purpose.
