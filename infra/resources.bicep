@@ -63,10 +63,7 @@ resource assetsContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
 // Everything starts Hot. Auto-tier by asset type via leading-prefix rules
 // (all tiers stay online/instant; never Archive). Prefix matches include the
 // container name as the first segment.
-//  - Season (global) assets, assets/seasons/*: age-based BACKSTOP to Cold at ~13mo.
-//      The intended "Cold as of June 1 each season" is a calendar date, which
-//      lifecycle rules cannot express; that will be done by an admin "close out
-//      season" action (HTTP function). This rule is only a safety net.
+//  - Season (global) assets, assets/seasons/*: Hot, then Cold at ~13 months.
 //  - Tournament uploads, assets/users/*: Hot 30d -> Cool (90d) -> Cold at day 120.
 //  - Generated decks (output), assets/outputs/*: Hot 7d -> Cold. Short Hot window
 //      covers the near-immediate (fee-free) download; skips Cool to avoid its
@@ -78,7 +75,7 @@ resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2
     policy: {
       rules: [
         {
-          name: 'season-assets-cold-backstop-13mo'
+          name: 'season-assets-cold-13mo'
           enabled: true
           type: 'Lifecycle'
           definition: {
@@ -92,7 +89,7 @@ resource lifecyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2
             }
             actions: {
               baseBlob: {
-                // 13 months ~= 395 days. Backstop only; see note above.
+                // 13 months ~= 395 days.
                 tierToCold: {
                   daysAfterModificationGreaterThan: 395
                 }
