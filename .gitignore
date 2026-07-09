@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+dist/
+build/
+out/
+.vite/
+*.tsbuildinfo
+
+# Environment & secrets (NEVER commit)
+.env
+.env.*
+!.env.example
+local.settings.json
+appsettings.local.json
+
+# Azure / infra
+infra/main.parameters.json
+!infra/main.parameters.example.json
+.azure/
+*.azurePubxml
+
+# Azure Static Web Apps / Functions local
+.func/
+bin/
+obj/
+swa-cli.config.local.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local sample data (not committed by default; add fixtures explicitly)
+/sample-data/
